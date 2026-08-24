@@ -66,6 +66,17 @@ struct ReaderView: View {
                 }.padding(.leading, 78)
             }
             Spacer(minLength: 8)
+            Button { workspace.refreshSelected() } label: {
+                ZStack(alignment: .bottomTrailing) {
+                    Image(systemName: workspace.selectedTab?.isAvailable == false ? "exclamationmark.triangle" : "arrow.clockwise")
+                    Circle()
+                        .fill(workspace.selectedTab?.isAvailable == false ? Color.orange : Color(hex: palette.accent))
+                        .frame(width: 5, height: 5)
+                        .overlay(Circle().stroke(Color(hex: palette.chrome), lineWidth: 1))
+                }
+            }
+            .disabled(workspace.selectedTab == nil)
+            .help(workspace.syncStatusText)
             Button { workspace.showSearch() } label: { Image(systemName: "magnifyingglass") }.help("Поиск — ⌘F")
             Button { showThemePicker.toggle() } label: { Image(systemName: "circle.lefthalf.filled") }
                 .help("Тема").popover(isPresented: $showThemePicker, arrowEdge: .top) { themePicker }

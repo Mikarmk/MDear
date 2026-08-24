@@ -2,6 +2,13 @@
 
 All notable changes to MDore are documented here.
 
+## 1.1.1 — 2026-08-24
+
+- Added automatic synchronization when an open Markdown file changes on disk.
+- Added manual refresh with `⌘R` and a compact sync indicator in the toolbar.
+- Preserved the reading position while refreshing document content or appearance.
+- Added safe handling for atomic saves and temporarily unavailable files.
+
 ## 1.1.0 — 2026-08-24
 
 - Added proper GitHub Flavored Markdown table parsing.

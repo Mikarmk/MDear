@@ -17,6 +17,8 @@ struct MDoreApp: App {
                 Button("Закрыть вкладку") { workspace.closeSelected() }.keyboardShortcut("w")
             }
             CommandGroup(after: .toolbar) {
+                Button("Обновить документ") { workspace.refreshSelected() }.keyboardShortcut("r")
+                Divider()
                 Button("Найти") { workspace.showSearch() }.keyboardShortcut("f")
                 Button("Найти далее") { workspace.findNext() }.keyboardShortcut("g")
                 Divider()

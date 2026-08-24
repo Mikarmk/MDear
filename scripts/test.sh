@@ -20,3 +20,13 @@ swiftc -parse-as-library \
 
 "$TEST_DIR/RendererTests"
 
+swiftc -parse-as-library \
+  -target "${ARCH}-apple-macos14.0" \
+  -sdk "$SDK_PATH" \
+  -framework AppKit \
+  -framework UniformTypeIdentifiers \
+  "$ROOT_DIR/Sources/MDore/MarkdownDocument.swift" \
+  "$ROOT_DIR/Tests/WorkspaceSyncTests.swift" \
+  -o "$TEST_DIR/WorkspaceSyncTests"
+
+"$TEST_DIR/WorkspaceSyncTests"

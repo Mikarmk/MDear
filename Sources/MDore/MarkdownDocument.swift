@@ -3,10 +3,30 @@ import AppKit
 import UniformTypeIdentifiers
 
 struct MarkdownTab: Identifiable, Equatable {
-    let id = UUID()
+    let id: UUID
     let url: URL
-    let markdown: String
+    var markdown: String
+    var fingerprint: FileFingerprint
+    var isAvailable: Bool
+    var lastSyncedAt: Date
+
+    init(id: UUID = UUID(), url: URL, markdown: String, fingerprint: FileFingerprint,
+         isAvailable: Bool = true, lastSyncedAt: Date = .now) {
+        self.id = id
+        self.url = url
+        self.markdown = markdown
+        self.fingerprint = fingerprint
+        self.isAvailable = isAvailable
+        self.lastSyncedAt = lastSyncedAt
+    }
+
     var title: String { url.deletingPathExtension().lastPathComponent }
+}
+
+struct FileFingerprint: Equatable {
+    let modificationDate: Date?
+    let size: UInt64
+    let fileNumber: UInt64
 }
 
 enum ReaderTheme: String, CaseIterable, Identifiable {
@@ -45,9 +65,37 @@ final class ReaderWorkspace: ObservableObject {
         didSet { UserDefaults.standard.set(theme.rawValue, forKey: "readerTheme") }
     }
     @Published var defaultReaderResult: String?
+    @Published private(set) var syncRevision = 0
 
-    init() { theme = ReaderTheme(rawValue: UserDefaults.standard.string(forKey: "readerTheme") ?? "") ?? .paper }
+    private var monitorTask: Task<Void, Never>?
+    private var reloadTasks: [UUID: Task<Void, Never>] = [:]
+
+    init(startMonitoring: Bool = true) {
+        theme = ReaderTheme(rawValue: UserDefaults.standard.string(forKey: "readerTheme") ?? "") ?? .paper
+        if startMonitoring {
+            monitorTask = Task { [weak self] in
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .milliseconds(650))
+                    guard !Task.isCancelled else { return }
+                    self?.refreshChangedFiles()
+                }
+            }
+        }
+    }
+
+    deinit {
+        monitorTask?.cancel()
+        reloadTasks.values.forEach { $0.cancel() }
+    }
+
     var selectedTab: MarkdownTab? { tabs.first(where: { $0.id == selectedID }) }
+
+    var syncStatusText: String {
+        guard let tab = selectedTab else { return "Нет открытого документа" }
+        return tab.isAvailable
+            ? "Синхронизация включена · Обновить сейчас — ⌘R"
+            : "Файл временно недоступен · Повторить — ⌘R"
+    }
 
     func chooseFiles() {
         let panel = NSOpenPanel()
@@ -66,9 +114,8 @@ final class ReaderWorkspace: ObservableObject {
             selectedID = existing.id; return
         }
         do {
-            let data = try Data(contentsOf: fileURL, options: .mappedIfSafe)
-            let decoded = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .windowsCP1251) ?? String(decoding: data, as: UTF8.self)
-            let tab = MarkdownTab(url: fileURL, markdown: decoded)
+            let document = try readDocument(at: fileURL)
+            let tab = MarkdownTab(url: fileURL, markdown: document.markdown, fingerprint: document.fingerprint)
             tabs.append(tab); selectedID = tab.id
             NSDocumentController.shared.noteNewRecentDocumentURL(fileURL)
         } catch { NSSound.beep() }
@@ -76,10 +123,17 @@ final class ReaderWorkspace: ObservableObject {
 
     func close(_ id: UUID) {
         guard let index = tabs.firstIndex(where: { $0.id == id }) else { return }
+        reloadTasks.removeValue(forKey: id)?.cancel()
         tabs.remove(at: index)
         if selectedID == id { selectedID = tabs.indices.contains(index) ? tabs[index].id : tabs.last?.id }
     }
     func closeSelected() { if let selectedID { close(selectedID) } }
+
+    func refreshSelected() {
+        guard let selectedID else { return }
+        reloadTasks.removeValue(forKey: selectedID)?.cancel()
+        refresh(id: selectedID, forceFeedback: true)
+    }
 
     func followLink(_ url: URL) {
         if url.isFileURL, ["md", "markdown", "mdown"].contains(url.pathExtension.lowercased()) { open(url) }
@@ -91,6 +145,73 @@ final class ReaderWorkspace: ObservableObject {
     func findNext(backwards: Bool = false) { findRevision += backwards ? -1 : 1 }
     func adjustTextSize(by step: Double) { textScale = min(1.45, max(0.75, textScale + step * 0.1)) }
     func resetTextSize() { textScale = 1 }
+
+    private func refreshChangedFiles() {
+        for tab in tabs {
+            guard let current = try? fingerprint(for: tab.url) else {
+                setAvailability(false, for: tab.id)
+                continue
+            }
+            if current != tab.fingerprint {
+                scheduleReload(for: tab.id)
+            } else if !tab.isAvailable {
+                setAvailability(true, for: tab.id)
+            }
+        }
+    }
+
+    private func scheduleReload(for id: UUID) {
+        reloadTasks[id]?.cancel()
+        reloadTasks[id] = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(220))
+            guard !Task.isCancelled else { return }
+            self?.refresh(id: id, forceFeedback: false)
+            self?.reloadTasks[id] = nil
+        }
+    }
+
+    private func refresh(id: UUID, forceFeedback: Bool) {
+        guard let index = tabs.firstIndex(where: { $0.id == id }) else { return }
+        do {
+            let document = try readDocument(at: tabs[index].url)
+            var tab = tabs[index]
+            let contentChanged = tab.markdown != document.markdown
+            tab.markdown = document.markdown
+            tab.fingerprint = document.fingerprint
+            tab.isAvailable = true
+            tab.lastSyncedAt = .now
+            tabs[index] = tab
+            if contentChanged || forceFeedback { syncRevision += 1 }
+        } catch {
+            setAvailability(false, for: id)
+            if forceFeedback { NSSound.beep() }
+        }
+    }
+
+    private func setAvailability(_ isAvailable: Bool, for id: UUID) {
+        guard let index = tabs.firstIndex(where: { $0.id == id }), tabs[index].isAvailable != isAvailable else { return }
+        var tab = tabs[index]
+        tab.isAvailable = isAvailable
+        tabs[index] = tab
+        syncRevision += 1
+    }
+
+    private func readDocument(at url: URL) throws -> (markdown: String, fingerprint: FileFingerprint) {
+        let data = try Data(contentsOf: url, options: .mappedIfSafe)
+        let decoded = String(data: data, encoding: .utf8)
+            ?? String(data: data, encoding: .windowsCP1251)
+            ?? String(decoding: data, as: UTF8.self)
+        return (decoded, try fingerprint(for: url))
+    }
+
+    private func fingerprint(for url: URL) throws -> FileFingerprint {
+        let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+        return FileFingerprint(
+            modificationDate: attributes[.modificationDate] as? Date,
+            size: (attributes[.size] as? NSNumber)?.uint64Value ?? 0,
+            fileNumber: (attributes[.systemFileNumber] as? NSNumber)?.uint64Value ?? 0
+        )
+    }
 
     func makeDefaultReader() {
         let markdown = UTType(importedAs: "net.daringfireball.markdown", conformingTo: .plainText)

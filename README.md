@@ -37,6 +37,7 @@ The first public build is ad-hoc signed but not Apple-notarized, so macOS may re
 - Native SwiftUI application with no Electron runtime.
 - Multiple Markdown files in a compact tab bar.
 - Four reading themes: Paper, Porcelain, Graphite, and Midnight.
+- Automatic live refresh when an open file is saved in another application.
 - Interface automatically disappears while scrolling.
 - Full-screen reading that respects the MacBook camera area.
 - Search, responsive GFM tables, relative Markdown links, local images, task lists, code blocks, and Cyrillic text.
@@ -55,6 +56,7 @@ MDore 1.1 adds proper GFM tables with alignment, comfortable spacing, theme-awar
 | --- | --- |
 | Open one or more files | `⌘O` |
 | Close current tab | `⌘W` |
+| Refresh current document | `⌘R` |
 | Search | `⌘F` |
 | Find next | `⌘G` |
 | Distraction-free reading | `⌘⇧R` |

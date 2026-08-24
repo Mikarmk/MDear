@@ -32,8 +32,14 @@ struct MarkdownWebView: NSViewRepresentable {
 
         let signature = "\(markdown.hashValue):\(theme.rawValue):\(textScale)"
         if coordinator.signature != signature {
+            let html = MarkdownRenderer.render(markdown, theme: theme, textScale: textScale)
+            let isInitialLoad = coordinator.signature.isEmpty
             coordinator.signature = signature
-            webView.loadHTMLString(MarkdownRenderer.render(markdown, theme: theme, textScale: textScale), baseURL: baseURL)
+            if isInitialLoad {
+                webView.loadHTMLString(html, baseURL: baseURL)
+            } else {
+                coordinator.reloadPreservingPosition(in: webView, html: html, baseURL: baseURL)
+            }
         } else if coordinator.lastSearchQuery != searchQuery || coordinator.lastFindRevision != findRevision {
             coordinator.performSearch(in: webView)
         }
@@ -47,8 +53,23 @@ struct MarkdownWebView: NSViewRepresentable {
         var findRevision = 0
         var lastSearchQuery = ""
         var lastFindRevision = 0
+        var pendingScrollY: Double?
 
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) { performSearch(in: webView) }
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            if let pendingScrollY {
+                self.pendingScrollY = nil
+                webView.evaluateJavaScript("window.scrollTo(0, \(pendingScrollY));")
+            }
+            performSearch(in: webView)
+        }
+
+        func reloadPreservingPosition(in webView: WKWebView, html: String, baseURL: URL?) {
+            webView.evaluateJavaScript("window.scrollY") { [weak self, weak webView] value, _ in
+                guard let self, let webView else { return }
+                self.pendingScrollY = (value as? NSNumber)?.doubleValue
+                webView.loadHTMLString(html, baseURL: baseURL)
+            }
+        }
 
         func performSearch(in webView: WKWebView) {
             let backwards = findRevision < lastFindRevision
