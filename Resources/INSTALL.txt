@@ -14,7 +14,7 @@ not need to disable Gatekeeper or change security settings permanently.
 
 To make MDore the default Markdown app, open its Settings after launch.
 
-Installation complete. You can close this TXT now and open an MD.
+Installation complete. You can close this TXT now and open an MD :)
 
 
 РУССКИЙ
@@ -48,4 +48,4 @@ Apple. No hace falta desactivar Gatekeeper ni reducir la seguridad del Mac.
 
 Puedes convertir MDore en el lector Markdown predeterminado desde sus ajustes.
 
-Instalación terminada. Ya puedes cerrar este TXT y abrir un MD.
+Instalación terminada. Ya puedes cerrar este TXT y abrir un MD :)

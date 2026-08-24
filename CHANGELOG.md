@@ -2,6 +2,14 @@
 
 All notable changes to MDore are documented here.
 
+## 2.0.5 — 2026-08-24
+
+- Removed template-card movement on hover and stabilized hover geometry.
+- Added a third structured template, Document Brief, alongside Meeting Notes and Project Plan.
+- Fixed native controls and text contrast when switching between light and dark themes.
+- Added Japanese, Simplified Chinese, German, French, Portuguese, Hindi, Arabic, and Tatar interface languages.
+- Kept the built-in guide current and made the installer sign-off consistent in every existing translation :)
+
 ## 2.0.4 — 2026-08-24
 
 - Replaced the legacy lined-document app icon with the new MDore page-mark and coral fold.

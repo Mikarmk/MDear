@@ -71,6 +71,8 @@ struct ReaderView: View {
             scrollMonitor = nil
         }
         .animation(.easeOut(duration: 0.2), value: workspace.selectedID)
+        .environment(\.colorScheme, palette.isDark ? .dark : .light)
+        .environment(\.layoutDirection, workspace.language == .arabic ? .rightToLeft : .leftToRight)
     }
 
     private var chrome: some View {
@@ -416,6 +418,11 @@ struct HomeView: View {
                                 title: workspace.t("home.template.project"),
                                 palette: palette
                             ) { workspace.createDocument(from: .project) }
+                            TemplateCard(
+                                template: .brief,
+                                title: workspace.t("home.template.brief"),
+                                palette: palette
+                            ) { workspace.createDocument(from: .brief) }
                         }
                         .padding(.horizontal, 1)
                         .padding(.bottom, 8)
@@ -489,13 +496,13 @@ private struct TemplateCard: View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 10) {
                 TemplatePreview(template: template, palette: palette)
-                    .frame(width: 204, height: 132)
+                    .frame(width: 190, height: 132)
                     .background(Color(hex: palette.bg), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .overlay {
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .stroke(hovered ? Color(hex: palette.accent) : Color(hex: palette.line), lineWidth: hovered ? 1.5 : 1)
+                            .stroke(hovered ? Color(hex: palette.accent) : Color(hex: palette.line), lineWidth: 1.25)
                     }
-                    .shadow(color: .black.opacity(hovered ? 0.11 : 0.045), radius: hovered ? 12 : 4, y: hovered ? 6 : 2)
+                    .shadow(color: .black.opacity(hovered ? 0.08 : 0.045), radius: 8, y: 3)
 
                 Text(title)
                     .font(.system(size: 13.5, weight: .medium))
@@ -503,7 +510,6 @@ private struct TemplateCard: View {
                     .fixedSize(horizontal: true, vertical: false)
             }
             .contentShape(Rectangle())
-            .offset(y: hovered ? -2 : 0)
         }
         .buttonStyle(.plain)
         .onHover { value in
@@ -558,6 +564,17 @@ private struct TemplatePreview: View {
                     }
                     previewGap()
                     previewCheck(width: 90)
+                }
+            case .brief:
+                miniatureDocument {
+                    previewLine(width: 98, height: 8, accent: true)
+                    previewLine(width: 72)
+                    previewLine(width: 88)
+                    previewGap()
+                    previewLine(width: 48, height: 5)
+                    previewBullet(width: 92)
+                    previewBullet(width: 76)
+                    previewBullet(width: 84)
                 }
             }
         }
@@ -672,11 +689,7 @@ private struct RecentDocumentRow: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
-        switch language {
-        case .english: formatter.locale = Locale(identifier: "en_US")
-        case .russian: formatter.locale = Locale(identifier: "ru_RU")
-        case .spanish: formatter.locale = Locale(identifier: "es_ES")
-        }
+        formatter.locale = Locale(identifier: language.localeIdentifier)
         return formatter.string(from: date)
     }
 }
@@ -795,6 +808,8 @@ struct SettingsView: View {
         }
         .padding(28).frame(width: 520, height: 540)
         .foregroundStyle(Color(hex: palette.text)).background(Color(hex: palette.bg))
+        .environment(\.colorScheme, palette.isDark ? .dark : .light)
+        .environment(\.layoutDirection, workspace.language == .arabic ? .rightToLeft : .leftToRight)
     }
 
     private func settingRow<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -832,6 +847,16 @@ extension Color {
     init(hex: String) {
         let value = UInt64(hex.dropFirst(), radix: 16) ?? 0
         self.init(red: Double((value >> 16) & 255) / 255, green: Double((value >> 8) & 255) / 255, blue: Double(value & 255) / 255)
+    }
+}
+
+extension ThemePalette {
+    var isDark: Bool {
+        let value = UInt64(bg.dropFirst(), radix: 16) ?? 0
+        let red = Double((value >> 16) & 255)
+        let green = Double((value >> 8) & 255)
+        let blue = Double(value & 255)
+        return red * 0.299 + green * 0.587 + blue * 0.114 < 138
     }
 }
 

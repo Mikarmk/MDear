@@ -69,7 +69,7 @@ struct ThemePalette {
 enum EditorMode: String { case edit, read }
 
 enum DocumentTemplate: String, CaseIterable, Identifiable {
-    case blank, meeting, project
+    case blank, meeting, project, brief
     var id: String { rawValue }
 }
 
@@ -212,6 +212,7 @@ final class ReaderWorkspace: ObservableObject {
         case (.english, .paper): "Paper"; case (.english, .porcelain): "Porcelain"; case (.english, .graphite): "Graphite"; case (.english, .midnight): "Midnight"
         case (.spanish, .paper): "Papel"; case (.spanish, .porcelain): "Porcelana"; case (.spanish, .graphite): "Grafito"; case (.spanish, .midnight): "Medianoche"
         case (.russian, .paper): "Бумага"; case (.russian, .porcelain): "Фарфор"; case (.russian, .graphite): "Графит"; case (.russian, .midnight): "Полночь"
+        default: theme.rawValue.capitalized
         }
     }
 
@@ -267,9 +268,7 @@ final class ReaderWorkspace: ObservableObject {
         do {
             let folder = try libraryURL().appendingPathComponent("Guide", isDirectory: true).ensuringDirectory()
             let file = folder.appendingPathComponent("MDore Guide \(language.rawValue.uppercased()).md")
-            if !FileManager.default.fileExists(atPath: file.path) {
-                try guideDocument().write(to: file, atomically: true, encoding: .utf8)
-            }
+            try guideDocument().write(to: file, atomically: true, encoding: .utf8)
             open(file)
             editorMode = .read
         } catch { NSSound.beep() }
@@ -607,11 +606,11 @@ final class ReaderWorkspace: ObservableObject {
     }
 
     private func localizedUntitledName() -> String {
-        switch language { case .english: "Untitled"; case .russian: "Без названия"; case .spanish: "Sin título" }
+        switch language { case .english: "Untitled"; case .russian: "Без названия"; case .spanish: "Sin título"; default: t("home.template.blank") }
     }
 
     private func localizedTemplateName(_ template: DocumentTemplate) -> String {
-        switch (language, template) {
+        return switch (language, template) {
         case (.english, .blank): "Untitled"
         case (.russian, .blank): "Без названия"
         case (.spanish, .blank): "Sin título"
@@ -621,11 +620,22 @@ final class ReaderWorkspace: ObservableObject {
         case (.english, .project): "Project plan"
         case (.russian, .project): "План проекта"
         case (.spanish, .project): "Plan del proyecto"
+        case (_, .brief): t("home.template.brief")
+        default:
+            switch template {
+            case .blank: localizedUntitledName()
+            case .meeting: t("home.template.meeting")
+            case .project: t("home.template.project")
+            case .brief: t("home.template.brief")
+            }
         }
     }
 
     private func templateDocument(_ template: DocumentTemplate) -> String {
-        switch (language, template) {
+        if template == .brief {
+            return "# \(t("home.template.brief"))\n\n> \(t("home.subtitle"))\n\n## Summary\n\n\n## Audience\n\n- \n\n## Key points\n\n- \n\n## References\n\n- \n\n## Next step\n\n- [ ] \n"
+        }
+        return switch (language, template) {
         case (.english, .blank):
             "# Untitled\n\nStart writing…\n"
         case (.russian, .blank):
@@ -644,6 +654,12 @@ final class ReaderWorkspace: ObservableObject {
             "# План проекта\n\n> Одним предложением опишите результат.\n\n## Цель\n\n\n## Объём\n\n### Входит\n\n- \n\n### Не входит\n\n- \n\n## Этапы\n\n| Этап | Ответственный | Срок | Статус |\n| --- | --- | --- | --- |\n| Первый этап |  |  | Запланирован |\n\n## Риски\n\n- \n\n## Следующие действия\n\n- [ ] \n"
         case (.spanish, .project):
             "# Plan del proyecto\n\n> Describe el resultado en una frase.\n\n## Objetivo\n\n\n## Alcance\n\n### Incluido\n\n- \n\n### No incluido\n\n- \n\n## Hitos\n\n| Hito | Responsable | Fecha | Estado |\n| --- | --- | --- | --- |\n| Primer hito |  |  | Planificado |\n\n## Riesgos\n\n- \n\n## Próximas acciones\n\n- [ ] \n"
+        default:
+            template == .blank
+                ? "# \(t("home.template.blank"))\n\n\(t("home.subtitle"))\n"
+                : template == .meeting
+                    ? "# \(t("home.template.meeting"))\n\n## Agenda\n\n- \n\n## Notes\n\n\n## Decisions\n\n- [ ] \n\n## Next steps\n\n- [ ] \n"
+                    : "# \(t("home.template.project"))\n\n## Goal\n\n\n## Scope\n\n- \n\n## Milestones\n\n| Milestone | Owner | Date | Status |\n| --- | --- | --- | --- |\n|  |  |  |  |\n\n## Next actions\n\n- [ ] \n"
         }
     }
 
@@ -723,6 +739,25 @@ final class ReaderWorkspace: ObservableObject {
             Usa Insertar → Diagrama Mermaid y describe el flujo con texto.
 
             > Tus archivos siguen siendo Markdown normal y te pertenecen.
+            """
+        default:
+            """
+            # \(t("home.guide"))
+
+            \(t("home.subtitle"))
+
+            ## Essentials
+
+            - **\(t("editor.edit"))** / **\(t("editor.read"))**
+            - `⌘S` — \(t("common.save"))
+            - `⌘F` — \(t("search.placeholder"))
+            - \(t("home.drop"))
+
+            ## LaTeX and diagrams
+
+            \(t("editor.math")), \(t("editor.diagram")), \(t("editor.table")), \(t("editor.image")).
+
+            > Markdown stays yours. :)
             """
         }
     }
