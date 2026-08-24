@@ -2,6 +2,13 @@
 
 All notable changes to MDore are documented here.
 
+## 2.0.1 — 2026-08-24
+
+- Rebuilt the home screen around the adaptive MDore logo, one primary New Document action, and recent documents.
+- Added theme-aware logo inversion while preserving the coral brand accent.
+- Simplified recent-document rows with clearer paths and restrained hover feedback.
+- Moved the built-in guide to the native Help menu to keep the home screen focused.
+
 ## 2.0.0 — 2026-08-24
 
 - Added a seamless visual Markdown editor: edit the rendered document without switching to source or a separate preview.

@@ -52,6 +52,9 @@ struct MDoreApp: App {
                 Button("Numbered List") { workspace.perform(.orderedList) }.keyboardShortcut("o", modifiers: [.command, .option])
                 Button("Code Block") { workspace.perform(.codeFence("")) }.keyboardShortcut("c", modifiers: [.command, .option])
             }
+            CommandGroup(replacing: .help) {
+                Button(workspace.t("home.guide")) { workspace.openGuide() }
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import AppKit
 
 struct ReaderView: View {
     @EnvironmentObject private var workspace: ReaderWorkspace
@@ -365,67 +366,194 @@ struct EditorToolbar: View {
 
 struct HomeView: View {
     @EnvironmentObject private var workspace: ReaderWorkspace
+    @State private var appeared = false
     private var palette: ThemePalette { workspace.palette }
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .topTrailing) {
+            LinearGradient(
+                colors: [Color(hex: palette.accent).opacity(0.045), .clear],
+                startPoint: .topLeading,
+                endPoint: .center
+            )
+            .ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    BrandLockup(palette: palette)
+                        .frame(height: 104)
+                        .accessibilityLabel("MDore")
+                        .padding(.bottom, 38)
+
+                    Button(action: workspace.createDocument) {
+                        HStack(spacing: 10) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 13, weight: .bold))
+                            Text(workspace.t("home.new"))
+                                .font(.system(size: 14, weight: .semibold))
+                            Spacer(minLength: 34)
+                            Text("⌘N")
+                                .font(.system(size: 11.5, weight: .medium, design: .rounded))
+                                .opacity(0.72)
+                        }
+                        .padding(.horizontal, 17)
+                        .frame(width: 246, height: 44)
+                    }
+                    .buttonStyle(HomePrimaryButtonStyle(accent: Color(hex: palette.accent)))
+                    .padding(.bottom, 66)
+
+                    Text(workspace.t("home.recent"))
+                        .font(.system(size: 11.5, weight: .semibold))
+                        .foregroundStyle(Color(hex: palette.muted))
+                        .textCase(.uppercase)
+                        .tracking(0.9)
+                        .padding(.bottom, 11)
+
+                    Rectangle()
+                        .fill(Color(hex: palette.line))
+                        .frame(height: 1)
+
+                    if workspace.recentURLs.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(workspace.t("home.empty"))
+                                .font(.system(size: 14, weight: .medium))
+                            Text(workspace.t("home.drop"))
+                                .font(.system(size: 12.5))
+                                .foregroundStyle(Color(hex: palette.muted))
+                        }
+                        .padding(.vertical, 25)
+                    } else {
+                        ForEach(workspace.recentURLs.prefix(10), id: \.path) { url in
+                            RecentDocumentRow(url: url, palette: palette) {
+                                workspace.open(url)
+                            }
+                            Rectangle()
+                                .fill(Color(hex: palette.line))
+                                .frame(height: 1)
+                        }
+                    }
+                }
+                .frame(maxWidth: 720, alignment: .leading)
+                .padding(.horizontal, 64)
+                .padding(.top, 92)
+                .padding(.bottom, 70)
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 10)
+
             HStack {
-                Text("MDore").font(.system(size: 19, weight: .semibold, design: .serif))
                 Spacer()
                 Button { workspace.isSettingsPresented = true } label: { Image(systemName: "slider.horizontal.3") }
                     .buttonStyle(ChromeButtonStyle(color: Color(hex: palette.muted))).help(workspace.t("common.settings"))
-            }.padding(.leading, 82).padding(.trailing, 18).frame(height: 54)
-
-            HStack(alignment: .top, spacing: 74) {
-                VStack(alignment: .leading, spacing: 26) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("MDore").font(.system(size: 52, weight: .semibold, design: .serif)).tracking(-1.8)
-                        Text(workspace.t("home.subtitle")).font(.system(size: 16)).foregroundStyle(Color(hex: palette.muted))
-                    }
-                    HStack(spacing: 10) {
-                        Button(action: workspace.createDocument) { Label(workspace.t("home.new"), systemImage: "square.and.pencil") }
-                            .buttonStyle(.borderedProminent).tint(Color(hex: palette.accent)).controlSize(.large)
-                        Button(action: workspace.chooseFiles) { Label(workspace.t("home.open"), systemImage: "folder") }
-                            .buttonStyle(.bordered).controlSize(.large)
-                    }
-                    Spacer()
-                    Text(workspace.t("home.drop")).font(.system(size: 12.5)).foregroundStyle(Color(hex: palette.muted).opacity(0.78))
-                }.frame(width: 330).frame(minHeight: 380, alignment: .topLeading)
-
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(workspace.t("home.recent")).font(.system(size: 12, weight: .semibold)).foregroundStyle(Color(hex: palette.muted)).textCase(.uppercase).tracking(0.8).padding(.bottom, 12)
-                    recentRow(title: workspace.t("home.guide"), detail: workspace.t("home.guide.detail"), symbol: "sparkles", action: workspace.openGuide)
-                    Rectangle().fill(Color(hex: palette.line)).frame(height: 1)
-                    if workspace.recentURLs.isEmpty {
-                        Text(workspace.t("home.empty")).font(.system(size: 13)).foregroundStyle(Color(hex: palette.muted)).padding(.vertical, 22)
-                    } else {
-                        ForEach(workspace.recentURLs.prefix(8), id: \.path) { url in
-                            recentRow(title: url.deletingPathExtension().lastPathComponent,
-                                      detail: url.deletingLastPathComponent().lastPathComponent,
-                                      symbol: "doc.text", action: { workspace.open(url) })
-                            Rectangle().fill(Color(hex: palette.line)).frame(height: 1)
-                        }
-                    }
-                }.frame(width: 440)
             }
-            .padding(.top, 72).padding(.horizontal, 82).frame(maxWidth: 1050)
-            Spacer()
+            .padding(.horizontal, 18)
+            .frame(height: 54)
         }
         .foregroundStyle(Color(hex: palette.text))
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.35)) { appeared = true }
+        }
     }
+}
 
-    private func recentRow(title: String, detail: String, symbol: String, action: @escaping () -> Void) -> some View {
+private struct RecentDocumentRow: View {
+    let url: URL
+    let palette: ThemePalette
+    let action: () -> Void
+    @State private var hovered = false
+
+    var body: some View {
         Button(action: action) {
-            HStack(spacing: 13) {
-                Image(systemName: symbol).font(.system(size: 16)).foregroundStyle(Color(hex: palette.accent)).frame(width: 24)
+            HStack(spacing: 14) {
+                Image(systemName: "doc.text")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color(hex: palette.accent))
+                    .frame(width: 22)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(title).font(.system(size: 14, weight: .medium)).lineLimit(1)
-                    Text(detail).font(.system(size: 11.5)).foregroundStyle(Color(hex: palette.muted)).lineLimit(1)
+                    Text(url.deletingPathExtension().lastPathComponent)
+                        .font(.system(size: 14, weight: .medium))
+                        .lineLimit(1)
+                    Text(url.deletingLastPathComponent().path.replacingOccurrences(of: NSHomeDirectory(), with: "~"))
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(Color(hex: palette.muted))
+                        .lineLimit(1)
                 }
                 Spacer()
-                Image(systemName: "chevron.right").font(.system(size: 10, weight: .semibold)).foregroundStyle(Color(hex: palette.muted).opacity(0.55))
-            }.contentShape(Rectangle()).frame(height: 58)
-        }.buttonStyle(.plain)
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 10.5, weight: .semibold))
+                    .foregroundStyle(Color(hex: palette.muted).opacity(hovered ? 0.9 : 0))
+                    .offset(x: hovered ? 0 : -3)
+            }
+            .padding(.horizontal, 10)
+            .contentShape(Rectangle())
+            .frame(height: 62)
+            .background(Color(hex: palette.code).opacity(hovered ? 0.72 : 0), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .onHover { value in
+            withAnimation(.easeOut(duration: 0.14)) { hovered = value }
+        }
+    }
+}
+
+private struct AdaptiveBrandLogo: View {
+    let name: String
+    let palette: ThemePalette
+
+    var body: some View {
+        Group {
+            if let image = renderedImage {
+                Image(nsImage: image)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+            } else {
+                Text("MDore")
+                    .font(.system(size: 62, weight: .bold, design: .rounded))
+            }
+        }
+    }
+
+    private var renderedImage: NSImage? {
+        guard let url = Bundle.main.url(forResource: name, withExtension: "svg", subdirectory: "Brand"),
+              var svg = try? String(contentsOf: url, encoding: .utf8) else { return nil }
+        svg = svg
+            .replacingOccurrences(of: "<rect width=\"899\" height=\"256\" fill=\"white\"/>", with: "")
+            .replacingOccurrences(of: "<rect width=\"256\" height=\"256\" fill=\"white\"/>", with: "")
+            .replacingOccurrences(of: "#1C1C1C", with: palette.text)
+            .replacingOccurrences(of: "#FDFAF6", with: palette.bg)
+        guard let data = svg.data(using: .utf8) else { return nil }
+        return NSImage(data: data)
+    }
+}
+
+private struct BrandLockup: View {
+    let palette: ThemePalette
+
+    var body: some View {
+        HStack(spacing: 21) {
+            AdaptiveBrandLogo(name: "logo", palette: palette)
+                .frame(width: 104, height: 104)
+            Text("MDore")
+                .font(.system(size: 62, weight: .bold, design: .rounded))
+                .tracking(-2.4)
+                .foregroundStyle(Color(hex: palette.text))
+        }
+        .fixedSize(horizontal: true, vertical: false)
+    }
+}
+
+private struct HomePrimaryButtonStyle: ButtonStyle {
+    let accent: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(.white)
+            .background(accent.opacity(configuration.isPressed ? 0.82 : 1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
+            .shadow(color: accent.opacity(0.16), radius: 10, y: 4)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 

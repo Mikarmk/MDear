@@ -40,6 +40,7 @@ lipo -create "$BUILD_DIR/MDore-arm64" "$BUILD_DIR/MDore-x86_64" -output "$MACOS_
 cp "$ROOT_DIR/Resources/Info.plist" "$CONTENTS_DIR/Info.plist"
 cp "$ROOT_DIR/Resources/MDore.icns" "$RESOURCES_DIR/MDore.icns"
 cp -R "$ROOT_DIR/Resources/Vendor" "$RESOURCES_DIR/Vendor"
+cp -R "$ROOT_DIR/Resources/Brand" "$RESOURCES_DIR/Brand"
 
 codesign --force --deep --sign - "$APP_DIR"
 codesign --verify --deep --strict "$APP_DIR"
