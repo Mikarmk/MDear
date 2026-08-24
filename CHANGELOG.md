@@ -2,6 +2,11 @@
 
 All notable changes to MDore are documented here.
 
+## 2.0.4 — 2026-08-24
+
+- Replaced the legacy lined-document app icon with the new MDore page-mark and coral fold.
+- Added a reproducible icon build pipeline from the bundled SVG brand source.
+
 ## 2.0.3 — 2026-08-24
 
 - Reworked the DMG installer with a tactile charcoal background and a warm arrow made from Markdown symbols.
