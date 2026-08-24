@@ -370,61 +370,84 @@ struct HomeView: View {
     private var palette: ThemePalette { workspace.palette }
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            LinearGradient(
-                colors: [Color(hex: palette.accent).opacity(0.045), .clear],
-                startPoint: .topLeading,
-                endPoint: .center
-            )
-            .ignoresSafeArea()
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                BrandLockup(palette: palette, iconSize: 34, fontSize: 25, spacing: 10)
+                    .accessibilityLabel("MDore")
+                Spacer()
+                Button { workspace.chooseFiles() } label: {
+                    Image(systemName: "folder")
+                }
+                .buttonStyle(ChromeButtonStyle(color: Color(hex: palette.muted)))
+                .help(workspace.t("home.open"))
+                Button { workspace.isSettingsPresented = true } label: {
+                    Image(systemName: "slider.horizontal.3")
+                }
+                .buttonStyle(ChromeButtonStyle(color: Color(hex: palette.muted)))
+                .help(workspace.t("common.settings"))
+            }
+            .padding(.horizontal, 32)
+            .frame(height: 64)
+            .background(Color(hex: palette.chrome).opacity(0.92))
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(Color(hex: palette.line)).frame(height: 1)
+            }
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    BrandLockup(palette: palette)
-                        .frame(height: 104)
-                        .accessibilityLabel("MDore")
-                        .padding(.bottom, 38)
+                    Text(workspace.t("home.create"))
+                        .font(.system(size: 13, weight: .semibold))
+                        .padding(.bottom, 16)
 
-                    Button(action: workspace.createDocument) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 13, weight: .bold))
-                            Text(workspace.t("home.new"))
-                                .font(.system(size: 14, weight: .semibold))
-                            Spacer(minLength: 34)
-                            Text("⌘N")
-                                .font(.system(size: 11.5, weight: .medium, design: .rounded))
-                                .opacity(0.72)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 18) {
+                            TemplateCard(
+                                template: .blank,
+                                title: workspace.t("home.template.blank"),
+                                palette: palette
+                            ) { workspace.createDocument(from: .blank) }
+                            TemplateCard(
+                                template: .meeting,
+                                title: workspace.t("home.template.meeting"),
+                                palette: palette
+                            ) { workspace.createDocument(from: .meeting) }
+                            TemplateCard(
+                                template: .project,
+                                title: workspace.t("home.template.project"),
+                                palette: palette
+                            ) { workspace.createDocument(from: .project) }
                         }
-                        .padding(.horizontal, 17)
-                        .frame(width: 246, height: 44)
+                        .padding(.horizontal, 1)
+                        .padding(.bottom, 8)
                     }
-                    .buttonStyle(HomePrimaryButtonStyle(accent: Color(hex: palette.accent)))
-                    .padding(.bottom, 66)
+                    .padding(.bottom, 42)
 
-                    Text(workspace.t("home.recent"))
-                        .font(.system(size: 11.5, weight: .semibold))
-                        .foregroundStyle(Color(hex: palette.muted))
-                        .textCase(.uppercase)
-                        .tracking(0.9)
-                        .padding(.bottom, 11)
+                    HStack {
+                        Text(workspace.t("home.recent"))
+                            .font(.system(size: 13, weight: .semibold))
+                        Spacer()
+                        Text(workspace.t("home.drop"))
+                            .font(.system(size: 11.5))
+                            .foregroundStyle(Color(hex: palette.muted))
+                    }
+                    .padding(.bottom, 13)
 
-                    Rectangle()
-                        .fill(Color(hex: palette.line))
-                        .frame(height: 1)
+                    RecentDocumentsHeader(palette: palette)
+                        .environmentObject(workspace)
 
                     if workspace.recentURLs.isEmpty {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(workspace.t("home.empty"))
-                                .font(.system(size: 14, weight: .medium))
-                            Text(workspace.t("home.drop"))
-                                .font(.system(size: 12.5))
-                                .foregroundStyle(Color(hex: palette.muted))
-                        }
-                        .padding(.vertical, 25)
+                        Text(workspace.t("home.empty"))
+                            .font(.system(size: 13))
+                            .foregroundStyle(Color(hex: palette.muted))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 28)
                     } else {
-                        ForEach(workspace.recentURLs.prefix(10), id: \.path) { url in
-                            RecentDocumentRow(url: url, palette: palette) {
+                        ForEach(workspace.recentURLs.prefix(12), id: \.path) { url in
+                            RecentDocumentRow(
+                                url: url,
+                                palette: palette,
+                                language: workspace.language
+                            ) {
                                 workspace.open(url)
                             }
                             Rectangle()
@@ -433,26 +456,165 @@ struct HomeView: View {
                         }
                     }
                 }
-                .frame(maxWidth: 720, alignment: .leading)
-                .padding(.horizontal, 64)
-                .padding(.top, 92)
-                .padding(.bottom, 70)
-                .frame(maxWidth: .infinity, alignment: .center)
+                .frame(maxWidth: 860, alignment: .leading)
+                .padding(.horizontal, 48)
+                .padding(.top, 36)
+                .padding(.bottom, 64)
+                .frame(maxWidth: .infinity)
             }
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 10)
-
-            HStack {
-                Spacer()
-                Button { workspace.isSettingsPresented = true } label: { Image(systemName: "slider.horizontal.3") }
-                    .buttonStyle(ChromeButtonStyle(color: Color(hex: palette.muted))).help(workspace.t("common.settings"))
-            }
-            .padding(.horizontal, 18)
-            .frame(height: 54)
+            .background(
+                LinearGradient(
+                    colors: [Color(hex: palette.accent).opacity(0.035), .clear],
+                    startPoint: .topLeading,
+                    endPoint: .center
+                )
+            )
         }
         .foregroundStyle(Color(hex: palette.text))
+        .opacity(appeared ? 1 : 0)
         .onAppear {
-            withAnimation(.easeOut(duration: 0.35)) { appeared = true }
+            withAnimation(.easeOut(duration: 0.28)) { appeared = true }
+        }
+    }
+}
+
+private struct TemplateCard: View {
+    let template: DocumentTemplate
+    let title: String
+    let palette: ThemePalette
+    let action: () -> Void
+    @State private var hovered = false
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 10) {
+                TemplatePreview(template: template, palette: palette)
+                    .frame(width: 204, height: 132)
+                    .background(Color(hex: palette.bg), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(hovered ? Color(hex: palette.accent) : Color(hex: palette.line), lineWidth: hovered ? 1.5 : 1)
+                    }
+                    .shadow(color: .black.opacity(hovered ? 0.11 : 0.045), radius: hovered ? 12 : 4, y: hovered ? 6 : 2)
+
+                Text(title)
+                    .font(.system(size: 13.5, weight: .medium))
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+            .contentShape(Rectangle())
+            .offset(y: hovered ? -2 : 0)
+        }
+        .buttonStyle(.plain)
+        .onHover { value in
+            withAnimation(.easeOut(duration: 0.16)) { hovered = value }
+        }
+    }
+}
+
+private struct TemplatePreview: View {
+    let template: DocumentTemplate
+    let palette: ThemePalette
+
+    var body: some View {
+        ZStack {
+            Color(hex: palette.bg)
+
+            switch template {
+            case .blank:
+                VStack(spacing: 8) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 24, weight: .light))
+                        .foregroundStyle(Color(hex: palette.accent))
+                    Text("MD")
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color(hex: palette.muted).opacity(0.65))
+                }
+            case .meeting:
+                miniatureDocument {
+                    previewLine(width: 92, height: 8, accent: true)
+                    previewLine(width: 60)
+                    previewLine(width: 72)
+                    previewGap()
+                    previewLine(width: 44, height: 5)
+                    previewBullet(width: 78)
+                    previewBullet(width: 58)
+                    previewGap()
+                    previewLine(width: 50, height: 5)
+                    previewCheck(width: 70)
+                }
+            case .project:
+                miniatureDocument {
+                    previewLine(width: 84, height: 8, accent: true)
+                    previewLine(width: 104)
+                    previewGap()
+                    HStack(spacing: 5) {
+                        RoundedRectangle(cornerRadius: 2).fill(Color(hex: palette.accent).opacity(0.28)).frame(width: 34, height: 28)
+                        VStack(alignment: .leading, spacing: 4) {
+                            previewLine(width: 56)
+                            previewLine(width: 48)
+                            previewLine(width: 52)
+                        }
+                    }
+                    previewGap()
+                    previewCheck(width: 90)
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    private func miniatureDocument<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 5, content: content)
+            .padding(.horizontal, 30)
+            .padding(.vertical, 22)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private func previewLine(width: CGFloat, height: CGFloat = 4, accent: Bool = false) -> some View {
+        RoundedRectangle(cornerRadius: 2)
+            .fill(accent ? Color(hex: palette.text) : Color(hex: palette.muted).opacity(0.3))
+            .frame(width: width, height: height)
+    }
+
+    private func previewGap() -> some View {
+        Color.clear.frame(height: 4)
+    }
+
+    private func previewBullet(width: CGFloat) -> some View {
+        HStack(spacing: 5) {
+            Circle().fill(Color(hex: palette.accent)).frame(width: 3, height: 3)
+            previewLine(width: width)
+        }
+    }
+
+    private func previewCheck(width: CGFloat) -> some View {
+        HStack(spacing: 5) {
+            RoundedRectangle(cornerRadius: 1).stroke(Color(hex: palette.accent), lineWidth: 1).frame(width: 7, height: 7)
+            previewLine(width: width)
+        }
+    }
+}
+
+private struct RecentDocumentsHeader: View {
+    @EnvironmentObject private var workspace: ReaderWorkspace
+    let palette: ThemePalette
+
+    var body: some View {
+        HStack(spacing: 18) {
+            Text(workspace.t("home.column.name")).frame(width: 250, alignment: .leading)
+            Text(workspace.t("home.column.folder")).frame(maxWidth: .infinity, alignment: .leading)
+            Text(workspace.t("home.column.modified")).frame(width: 110, alignment: .trailing)
+        }
+        .font(.system(size: 10.5, weight: .semibold))
+        .foregroundStyle(Color(hex: palette.muted))
+        .textCase(.uppercase)
+        .tracking(0.6)
+        .padding(.horizontal, 12)
+        .frame(height: 34)
+        .background(Color(hex: palette.chrome).opacity(0.75))
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Color(hex: palette.line)).frame(height: 1)
         }
     }
 }
@@ -460,42 +622,65 @@ struct HomeView: View {
 private struct RecentDocumentRow: View {
     let url: URL
     let palette: ThemePalette
+    let language: AppLanguage
     let action: () -> Void
     @State private var hovered = false
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 14) {
-                Image(systemName: "doc.text")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color(hex: palette.accent))
-                    .frame(width: 22)
-                VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 18) {
+                HStack(spacing: 10) {
+                    Image(systemName: "doc.text")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(Color(hex: palette.accent))
+                        .frame(width: 18)
                     Text(url.deletingPathExtension().lastPathComponent)
-                        .font(.system(size: 14, weight: .medium))
-                        .lineLimit(1)
-                    Text(url.deletingLastPathComponent().path.replacingOccurrences(of: NSHomeDirectory(), with: "~"))
-                        .font(.system(size: 11.5))
-                        .foregroundStyle(Color(hex: palette.muted))
+                        .font(.system(size: 13.5, weight: .medium))
                         .lineLimit(1)
                 }
-                Spacer()
-                Image(systemName: "arrow.up.right")
-                    .font(.system(size: 10.5, weight: .semibold))
-                    .foregroundStyle(Color(hex: palette.muted).opacity(hovered ? 0.9 : 0))
-                    .offset(x: hovered ? 0 : -3)
+                .frame(width: 250, alignment: .leading)
+
+                Text(folderText)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color(hex: palette.muted))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Text(modifiedText)
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(Color(hex: palette.muted))
+                    .frame(width: 110, alignment: .trailing)
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 12)
+            .frame(height: 50)
             .contentShape(Rectangle())
-            .frame(height: 62)
-            .background(Color(hex: palette.code).opacity(hovered ? 0.72 : 0), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .background(Color(hex: palette.code).opacity(hovered ? 0.68 : 0))
         }
         .buttonStyle(.plain)
         .onHover { value in
-            withAnimation(.easeOut(duration: 0.14)) { hovered = value }
+            withAnimation(.easeOut(duration: 0.12)) { hovered = value }
         }
     }
+
+    private var folderText: String {
+        url.deletingLastPathComponent().path.replacingOccurrences(of: NSHomeDirectory(), with: "~")
+    }
+
+    private var modifiedText: String {
+        guard let date = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate else { return "—" }
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        switch language {
+        case .english: formatter.locale = Locale(identifier: "en_US")
+        case .russian: formatter.locale = Locale(identifier: "ru_RU")
+        case .spanish: formatter.locale = Locale(identifier: "es_ES")
+        }
+        return formatter.string(from: date)
+    }
 }
+
 
 private struct AdaptiveBrandLogo: View {
     let name: String
@@ -530,14 +715,17 @@ private struct AdaptiveBrandLogo: View {
 
 private struct BrandLockup: View {
     let palette: ThemePalette
+    var iconSize: CGFloat = 104
+    var fontSize: CGFloat = 62
+    var spacing: CGFloat = 21
 
     var body: some View {
-        HStack(spacing: 21) {
+        HStack(spacing: spacing) {
             AdaptiveBrandLogo(name: "logo", palette: palette)
-                .frame(width: 104, height: 104)
+                .frame(width: iconSize, height: iconSize)
             Text("MDore")
-                .font(.system(size: 62, weight: .bold, design: .rounded))
-                .tracking(-2.4)
+                .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                .tracking(-fontSize * 0.038)
                 .foregroundStyle(Color(hex: palette.text))
         }
         .fixedSize(horizontal: true, vertical: false)

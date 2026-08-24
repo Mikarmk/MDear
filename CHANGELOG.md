@@ -2,6 +2,13 @@
 
 All notable changes to MDore are documented here.
 
+## 2.0.2 — 2026-08-24
+
+- Added a focused three-template shelf for blank documents, meeting notes, and project plans.
+- Added localized Markdown content for every template in English, Russian, and Spanish.
+- Replaced recent-document tiles with a compact list showing name, folder, and modification date.
+- Kept all template names, including New Document, on a single line.
+
 ## 2.0.1 — 2026-08-24
 
 - Rebuilt the home screen around the adaptive MDore logo, one primary New Document action, and recent documents.

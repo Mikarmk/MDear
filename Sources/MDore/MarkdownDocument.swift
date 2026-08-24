@@ -68,6 +68,11 @@ struct ThemePalette {
 
 enum EditorMode: String { case edit, read }
 
+enum DocumentTemplate: String, CaseIterable, Identifiable {
+    case blank, meeting, project
+    var id: String { rawValue }
+}
+
 enum SaveState: Equatable {
     case saved
     case saving
@@ -244,10 +249,15 @@ final class ReaderWorkspace: ObservableObject {
     }
 
     func createDocument() {
+        createDocument(from: .blank)
+    }
+
+    func createDocument(from template: DocumentTemplate) {
         do {
-            let folder = try uniqueDocumentFolder(named: localizedUntitledName())
-            let file = folder.appendingPathComponent("\(localizedUntitledName()).md")
-            try initialDocument().write(to: file, atomically: true, encoding: .utf8)
+            let name = localizedTemplateName(template)
+            let folder = try uniqueDocumentFolder(named: name)
+            let file = folder.appendingPathComponent("\(name).md")
+            try templateDocument(template).write(to: file, atomically: true, encoding: .utf8)
             open(file)
             editorMode = .edit
         } catch { NSSound.beep() }
@@ -600,11 +610,40 @@ final class ReaderWorkspace: ObservableObject {
         switch language { case .english: "Untitled"; case .russian: "Без названия"; case .spanish: "Sin título" }
     }
 
-    private func initialDocument() -> String {
-        switch language {
-        case .english: "# Untitled\n\nStart writing…\n"
-        case .russian: "# Без названия\n\nНачните писать…\n"
-        case .spanish: "# Sin título\n\nEmpieza a escribir…\n"
+    private func localizedTemplateName(_ template: DocumentTemplate) -> String {
+        switch (language, template) {
+        case (.english, .blank): "Untitled"
+        case (.russian, .blank): "Без названия"
+        case (.spanish, .blank): "Sin título"
+        case (.english, .meeting): "Meeting notes"
+        case (.russian, .meeting): "Заметки встречи"
+        case (.spanish, .meeting): "Notas de reunión"
+        case (.english, .project): "Project plan"
+        case (.russian, .project): "План проекта"
+        case (.spanish, .project): "Plan del proyecto"
+        }
+    }
+
+    private func templateDocument(_ template: DocumentTemplate) -> String {
+        switch (language, template) {
+        case (.english, .blank):
+            "# Untitled\n\nStart writing…\n"
+        case (.russian, .blank):
+            "# Без названия\n\nНачните писать…\n"
+        case (.spanish, .blank):
+            "# Sin título\n\nEmpieza a escribir…\n"
+        case (.english, .meeting):
+            "# Meeting notes\n\n**Date:** \n**Participants:** \n\n## Agenda\n\n- \n\n## Notes\n\n\n## Decisions\n\n- [ ] \n\n## Next steps\n\n- [ ] Owner — action\n"
+        case (.russian, .meeting):
+            "# Заметки встречи\n\n**Дата:** \n**Участники:** \n\n## Повестка\n\n- \n\n## Заметки\n\n\n## Решения\n\n- [ ] \n\n## Следующие шаги\n\n- [ ] Ответственный — действие\n"
+        case (.spanish, .meeting):
+            "# Notas de reunión\n\n**Fecha:** \n**Participantes:** \n\n## Agenda\n\n- \n\n## Notas\n\n\n## Decisiones\n\n- [ ] \n\n## Próximos pasos\n\n- [ ] Responsable — acción\n"
+        case (.english, .project):
+            "# Project plan\n\n> One sentence describing the outcome.\n\n## Goal\n\n\n## Scope\n\n### Included\n\n- \n\n### Not included\n\n- \n\n## Milestones\n\n| Milestone | Owner | Date | Status |\n| --- | --- | --- | --- |\n| First milestone |  |  | Planned |\n\n## Risks\n\n- \n\n## Next actions\n\n- [ ] \n"
+        case (.russian, .project):
+            "# План проекта\n\n> Одним предложением опишите результат.\n\n## Цель\n\n\n## Объём\n\n### Входит\n\n- \n\n### Не входит\n\n- \n\n## Этапы\n\n| Этап | Ответственный | Срок | Статус |\n| --- | --- | --- | --- |\n| Первый этап |  |  | Запланирован |\n\n## Риски\n\n- \n\n## Следующие действия\n\n- [ ] \n"
+        case (.spanish, .project):
+            "# Plan del proyecto\n\n> Describe el resultado en una frase.\n\n## Objetivo\n\n\n## Alcance\n\n### Incluido\n\n- \n\n### No incluido\n\n- \n\n## Hitos\n\n| Hito | Responsable | Fecha | Estado |\n| --- | --- | --- | --- |\n| Primer hito |  |  | Planificado |\n\n## Riesgos\n\n- \n\n## Próximas acciones\n\n- [ ] \n"
         }
     }
 
