@@ -13,20 +13,44 @@ struct MDoreApp: App {
         .windowStyle(.hiddenTitleBar)
         .commands {
             CommandGroup(replacing: .newItem) {
-                Button("Открыть…") { workspace.chooseFiles() }.keyboardShortcut("o")
-                Button("Закрыть вкладку") { workspace.closeSelected() }.keyboardShortcut("w")
+                Button(workspace.t("home.new")) { workspace.createDocument() }.keyboardShortcut("n")
+                Button(workspace.t("home.open")) { workspace.chooseFiles() }.keyboardShortcut("o")
+                Button(workspace.t("common.save")) { workspace.saveSelected() }.keyboardShortcut("s")
+                Menu("Export") {
+                    Button("PDF…") { workspace.perform(.exportPDF) }
+                    Button("HTML…") { workspace.perform(.exportHTML) }
+                }
+                Divider()
+                Button("Home") { workspace.showHome() }.keyboardShortcut("h", modifiers: [.command, .shift])
+                Button("Close Tab") { workspace.closeSelected() }.keyboardShortcut("w")
             }
             CommandGroup(after: .toolbar) {
-                Button("Обновить документ") { workspace.refreshSelected() }.keyboardShortcut("r")
+                Button("Refresh Document") { workspace.refreshSelected() }.keyboardShortcut("r")
                 Divider()
-                Button("Найти") { workspace.showSearch() }.keyboardShortcut("f")
-                Button("Найти далее") { workspace.findNext() }.keyboardShortcut("g")
+                Button(workspace.t("editor.edit")) { workspace.editorMode = .edit }.keyboardShortcut("e", modifiers: [.command, .shift])
+                Button(workspace.t("editor.read")) { workspace.editorMode = .read }.keyboardShortcut("p", modifiers: [.command, .shift])
                 Divider()
-                Button("Режим чтения") { NSApp.keyWindow?.toggleFullScreen(nil) }.keyboardShortcut("r", modifiers: [.command, .shift])
+                Button(workspace.t("search.placeholder")) { workspace.showSearch() }.keyboardShortcut("f")
+                Button("Find Next") { workspace.findNext() }.keyboardShortcut("g")
                 Divider()
-                Button("Увеличить текст") { workspace.adjustTextSize(by: 1) }.keyboardShortcut("+")
-                Button("Уменьшить текст") { workspace.adjustTextSize(by: -1) }.keyboardShortcut("-")
-                Button("Обычный размер") { workspace.resetTextSize() }.keyboardShortcut("0")
+                Button("Full Screen") { NSApp.keyWindow?.toggleFullScreen(nil) }.keyboardShortcut("r", modifiers: [.command, .shift])
+                Divider()
+                Button("Bigger Text") { workspace.adjustTextSize(by: 1) }.keyboardShortcut("+")
+                Button("Smaller Text") { workspace.adjustTextSize(by: -1) }.keyboardShortcut("-")
+                Button("Actual Size") { workspace.resetTextSize() }.keyboardShortcut("0")
+            }
+            CommandMenu("Format") {
+                Button("Bold") { workspace.perform(.bold) }.keyboardShortcut("b")
+                Button("Italic") { workspace.perform(.italic) }.keyboardShortcut("i")
+                Button("Link") { workspace.insertLink() }.keyboardShortcut("k")
+                Divider()
+                Button("Heading 1") { workspace.perform(.heading(1)) }.keyboardShortcut("1", modifiers: [.command, .option])
+                Button("Heading 2") { workspace.perform(.heading(2)) }.keyboardShortcut("2", modifiers: [.command, .option])
+                Button("Heading 3") { workspace.perform(.heading(3)) }.keyboardShortcut("3", modifiers: [.command, .option])
+                Divider()
+                Button("Bullet List") { workspace.perform(.unorderedList) }.keyboardShortcut("u", modifiers: [.command, .option])
+                Button("Numbered List") { workspace.perform(.orderedList) }.keyboardShortcut("o", modifiers: [.command, .option])
+                Button("Code Block") { workspace.perform(.codeFence("")) }.keyboardShortcut("c", modifiers: [.command, .option])
             }
         }
     }

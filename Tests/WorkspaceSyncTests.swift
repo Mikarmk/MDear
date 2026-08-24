@@ -31,6 +31,13 @@ struct WorkspaceSyncTests {
                      "Автоматическая синхронизация не заметила изменение файла")
         precondition(workspace.syncRevision == 2, "Автоматическое обновление должно подтверждаться интерфейсу")
 
+        guard let tabID = workspace.selectedID else { fatalError("Нет выбранной вкладки") }
+        workspace.updateMarkdown("# Четвёртая версия\n\nАвтосохранение", for: tabID)
+        try await Task.sleep(for: .milliseconds(800))
+        let saved = try String(contentsOf: file, encoding: .utf8)
+        precondition(saved.contains("Четвёртая версия"), "Автосохранение не записало изменения на диск")
+        precondition(workspace.selectedTab?.isDirty == false, "После автосохранения документ остался изменённым")
+
         print("Workspace sync tests passed")
     }
 }

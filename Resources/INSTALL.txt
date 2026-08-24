@@ -1,0 +1,51 @@
+MDore — installation
+====================
+
+ENGLISH
+
+1. Drag MDore.app onto the Applications folder in this window.
+2. Open Applications in Finder.
+3. The first time, Control-click MDore and choose Open.
+4. If macOS still blocks the app, open System Settings → Privacy & Security,
+   find the MDore message, click Open Anyway, and confirm.
+
+MDore is distributed independently and is not notarized by Apple yet. You do
+not need to disable Gatekeeper or change security settings permanently.
+
+To make MDore the default Markdown app, open its Settings after launch.
+
+Installation complete. You can close this TXT now and open an MD.
+
+
+РУССКИЙ
+
+1. Перетащите MDore.app на папку Applications / «Программы» в этом окне.
+2. Откройте папку «Программы» в Finder.
+3. При первом запуске нажмите на MDore с Control и выберите «Открыть».
+4. Если macOS всё равно блокирует запуск, откройте
+   «Системные настройки» → «Конфиденциальность и безопасность», найдите
+   сообщение о MDore, нажмите «Всё равно открыть» и подтвердите действие.
+
+MDore распространяется независимо и пока не нотарифицирован Apple. Отключать
+Gatekeeper или навсегда ослаблять настройки безопасности не требуется.
+
+Назначить MDore основным приложением для Markdown можно в настройках программы.
+
+Установка закончена. Теперь можно закрыть TXT и открыть MD :)
+
+
+ESPAÑOL
+
+1. Arrastra MDore.app a la carpeta Applications de esta ventana.
+2. Abre Applications en Finder.
+3. La primera vez, haz Control-clic en MDore y elige Abrir.
+4. Si macOS todavía bloquea la aplicación, abre Ajustes del Sistema →
+   Privacidad y seguridad, busca el aviso de MDore, pulsa Abrir igualmente
+   y confirma.
+
+MDore se distribuye de forma independiente y todavía no está notarizado por
+Apple. No hace falta desactivar Gatekeeper ni reducir la seguridad del Mac.
+
+Puedes convertir MDore en el lector Markdown predeterminado desde sus ajustes.
+
+Instalación terminada. Ya puedes cerrar este TXT y abrir un MD.

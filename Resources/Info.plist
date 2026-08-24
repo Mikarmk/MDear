@@ -7,14 +7,16 @@
   <key>CFBundleExecutable</key><string>MDore</string>
   <key>CFBundleIconFile</key><string>MDore</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>1.1.1</string>
-  <key>CFBundleVersion</key><string>3</string>
+  <key>CFBundleShortVersionString</key><string>2.0.0</string>
+  <key>CFBundleVersion</key><string>4</string>
+  <key>CFBundleDevelopmentRegion</key><string>en</string>
+  <key>CFBundleLocalizations</key><array><string>en</string><string>ru</string><string>es</string></array>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>NSHighResolutionCapable</key><true/>
   <key>CFBundleDocumentTypes</key><array><dict>
     <key>CFBundleTypeName</key><string>Markdown document</string>
     <key>CFBundleTypeExtensions</key><array><string>md</string><string>markdown</string><string>mdown</string></array>
-    <key>CFBundleTypeRole</key><string>Viewer</string>
+    <key>CFBundleTypeRole</key><string>Editor</string>
     <key>LSItemContentTypes</key><array><string>net.daringfireball.markdown</string></array>
     <key>LSHandlerRank</key><string>Owner</string>
   </dict></array>

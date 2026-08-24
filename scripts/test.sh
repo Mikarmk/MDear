@@ -13,6 +13,7 @@ swiftc -parse-as-library \
   -sdk "$SDK_PATH" \
   -framework AppKit \
   -framework UniformTypeIdentifiers \
+  "$ROOT_DIR/Sources/MDore/Localization.swift" \
   "$ROOT_DIR/Sources/MDore/MarkdownDocument.swift" \
   "$ROOT_DIR/Sources/MDore/MarkdownRenderer.swift" \
   "$ROOT_DIR/Tests/RendererTests.swift" \
@@ -25,6 +26,7 @@ swiftc -parse-as-library \
   -sdk "$SDK_PATH" \
   -framework AppKit \
   -framework UniformTypeIdentifiers \
+  "$ROOT_DIR/Sources/MDore/Localization.swift" \
   "$ROOT_DIR/Sources/MDore/MarkdownDocument.swift" \
   "$ROOT_DIR/Tests/WorkspaceSyncTests.swift" \
   -o "$TEST_DIR/WorkspaceSyncTests"

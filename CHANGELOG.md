@@ -2,6 +2,19 @@
 
 All notable changes to MDore are documented here.
 
+## 2.0.0 — 2026-08-24
+
+- Added a seamless visual Markdown editor: edit the rendered document without switching to source or a separate preview.
+- Added formatting for headings, bold, italic, strike, highlight, underline, inline code, superscript, and subscript.
+- Added ordered, unordered, and task lists, quotes, links, dividers, editable tables, and fenced code blocks.
+- Added offline MathJax rendering for inline and display LaTeX and offline Mermaid diagram rendering.
+- Added syntax highlighting, table of contents, footnotes, front matter, outline navigation, sibling-file navigation, and PDF/HTML export.
+- Added automatic saving, external-change conflict handling, and stable reading/caret position between Edit and Read modes.
+- Added a document library home screen, recent files, a built-in guide, managed image folders, image resizing, and drag-to-open tabs.
+- Added English, Russian, and Spanish interfaces.
+- Added custom accent and paper colors, reading width, background photos, focus mode, and typewriter mode.
+- Redesigned the DMG installer with a drag-to-Applications layout and trilingual installation instructions.
+
 ## 1.1.1 — 2026-08-24
 
 - Added automatic synchronization when an open Markdown file changes on disk.

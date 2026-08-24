@@ -22,6 +22,25 @@ struct RendererTests {
         ```swift
         let release = "1.1.0"
         ```
+
+        Inline $E = mc^2$ formula.
+
+        $$
+        \\frac{a}{b}
+        $$
+
+        ```mermaid
+        flowchart LR
+          A --> B
+        ```
+
+        [TOC]
+
+        A note[^calm].
+
+        [^calm]: Footnote text.
+
+        ![Desk](desk.png){width=50%}
         """
 
         let html = MarkdownRenderer.render(markdown, theme: .paper, textScale: 1)
@@ -29,10 +48,16 @@ struct RendererTests {
         expect(html.contains("<th style=\"text-align:center\">Status</th>"), "center alignment")
         expect(html.contains("<td style=\"text-align:right\">100</td>"), "right alignment")
         expect(html.contains("A | B"), "escaped pipe")
-        expect(html.contains("<h1>Table rendering</h1>"), "setext heading")
+        expect(html.contains("<h1 id=\"table-rendering\">Table rendering</h1>"), "setext heading")
         expect(html.contains("<blockquote>"), "multiline quote")
         expect(html.contains("class=\"code-label\">swift"), "fenced code language")
         expect(html.contains("Document metadata"), "front matter")
+        expect(html.contains("class=\"math-inline\""), "inline math")
+        expect(html.contains("class=\"math-block\""), "display math")
+        expect(html.contains("code-block diagram"), "diagram fence")
+        expect(html.contains("class=\"toc\""), "table of contents")
+        expect(html.contains("class=\"footnotes\""), "footnotes")
+        expect(html.contains("data-width=\"50\""), "image width")
         expect(!html.contains("| :--- |"), "separator is not visible")
         print("Renderer tests passed")
     }
@@ -44,4 +69,3 @@ struct RendererTests {
         }
     }
 }
-

@@ -12,6 +12,7 @@ swiftc -parse-as-library \
   -framework AppKit \
   -framework WebKit \
   -framework UniformTypeIdentifiers \
+  "$ROOT_DIR/Sources/MDore/Localization.swift" \
   "$ROOT_DIR/Sources/MDore/MarkdownDocument.swift" \
   "$ROOT_DIR/Sources/MDore/MarkdownRenderer.swift" \
   "$ROOT_DIR/Tests/VisualSnapshot.swift" \
@@ -19,4 +20,3 @@ swiftc -parse-as-library \
 
 "$SNAPSHOT_DIR/VisualSnapshot" "$INPUT_FILE" "$OUTPUT_FILE"
 echo "$OUTPUT_FILE"
-
