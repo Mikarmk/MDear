@@ -2,6 +2,9 @@
 
 [English version](README.md)
 
+[![Сборка](https://github.com/Mikarmk/MDear/actions/workflows/ci.yml/badge.svg)](https://github.com/Mikarmk/MDear/actions/workflows/ci.yml)
+[![Последний релиз](https://img.shields.io/github/v/release/Mikarmk/MDear)](https://github.com/Mikarmk/MDear/releases/latest)
+
 **Спокойный нативный ридер Markdown для macOS.**
 
 MDore открывает Markdown как документ, а не как код. Он подходит для спецификаций, протоколов встреч, инструкций, документации и README, которые хочется читать вне IDE.
@@ -70,4 +73,3 @@ dist/MDore-macOS.dmg
 ## Лицензия
 
 [MIT](LICENSE)
-
