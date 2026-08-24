@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build application and installer
         run: ./scripts/build.sh
       - name: Upload build artifacts
@@ -19,4 +19,3 @@ jobs:
           path: |
             dist/MDore-macOS.zip
             dist/MDore-macOS.dmg
-
