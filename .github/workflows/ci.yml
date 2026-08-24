@@ -10,6 +10,8 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v5
+      - name: Test Markdown rendering
+        run: ./scripts/test.sh
       - name: Build application and installer
         run: ./scripts/build.sh
       - name: Upload build artifacts

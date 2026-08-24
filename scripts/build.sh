@@ -48,4 +48,3 @@ hdiutil create -quiet -volname "MDore" -srcfolder "$DMG_ROOT" -ov -format UDZO "
 
 echo "Built:"
 ls -lh "$DIST_DIR/MDore-macOS.zip" "$DIST_DIR/MDore-macOS.dmg"
-

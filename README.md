@@ -39,9 +39,15 @@ The first public build is ad-hoc signed but not Apple-notarized, so macOS may re
 - Four reading themes: Paper, Porcelain, Graphite, and Midnight.
 - Interface automatically disappears while scrolling.
 - Full-screen reading that respects the MacBook camera area.
-- Search, relative Markdown links, local images, task lists, code blocks, and Cyrillic text.
+- Search, responsive GFM tables, relative Markdown links, local images, task lists, code blocks, and Cyrillic text.
 - Read-only by design: MDore never changes the opened document.
 - Completely local: no accounts, telemetry, or network requests.
+
+### Tables that belong in the document
+
+MDore 1.1 adds proper GFM tables with alignment, comfortable spacing, theme-aware styling, and contained horizontal scrolling for wide datasets.
+
+![Responsive Markdown tables in MDore](docs/images/tables.png)
 
 ## Shortcuts
 
