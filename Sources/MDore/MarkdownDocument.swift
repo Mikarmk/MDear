@@ -1,0 +1,105 @@
+import Foundation
+import AppKit
+import UniformTypeIdentifiers
+
+struct MarkdownTab: Identifiable, Equatable {
+    let id = UUID()
+    let url: URL
+    let markdown: String
+    var title: String { url.deletingPathExtension().lastPathComponent }
+}
+
+enum ReaderTheme: String, CaseIterable, Identifiable {
+    case paper, porcelain, graphite, midnight
+    var id: String { rawValue }
+    var title: String {
+        switch self { case .paper: "Бумага"; case .porcelain: "Фарфор"; case .graphite: "Графит"; case .midnight: "Полночь" }
+    }
+    var subtitle: String {
+        switch self { case .paper: "Тёплая и редакционная"; case .porcelain: "Чистая и воздушная"; case .graphite: "Спокойная и строгая"; case .midnight: "Глубокая и контрастная" }
+    }
+    var palette: ThemePalette {
+        switch self {
+        case .paper: ThemePalette(bg: "#F7F2E8", text: "#292721", muted: "#777066", line: "#DED6C8", code: "#EEE7DA", accent: "#9A6239", chrome: "#F2ECE1")
+        case .porcelain: ThemePalette(bg: "#FAFAF8", text: "#20211F", muted: "#737570", line: "#E4E5E1", code: "#F0F1EE", accent: "#356F73", chrome: "#F6F6F3")
+        case .graphite: ThemePalette(bg: "#20211F", text: "#E9E8E3", muted: "#A2A29C", line: "#393A36", code: "#292A27", accent: "#D0A36B", chrome: "#252623")
+        case .midnight: ThemePalette(bg: "#101419", text: "#E8EDF1", muted: "#89949E", line: "#29313A", code: "#181E24", accent: "#82B7C5", chrome: "#141A20")
+        }
+    }
+}
+
+struct ThemePalette {
+    let bg: String; let text: String; let muted: String; let line: String
+    let code: String; let accent: String; let chrome: String
+}
+
+@MainActor
+final class ReaderWorkspace: ObservableObject {
+    @Published private(set) var tabs: [MarkdownTab] = []
+    @Published var selectedID: UUID?
+    @Published var textScale = 1.0
+    @Published var searchQuery = ""
+    @Published var isSearchPresented = false
+    @Published var findRevision = 0
+    @Published var theme: ReaderTheme {
+        didSet { UserDefaults.standard.set(theme.rawValue, forKey: "readerTheme") }
+    }
+    @Published var defaultReaderResult: String?
+
+    init() { theme = ReaderTheme(rawValue: UserDefaults.standard.string(forKey: "readerTheme") ?? "") ?? .paper }
+    var selectedTab: MarkdownTab? { tabs.first(where: { $0.id == selectedID }) }
+
+    func chooseFiles() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [UTType(filenameExtension: "md")!, UTType(filenameExtension: "markdown")!]
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = false
+        panel.begin { [weak self] result in
+            guard result == .OK else { return }
+            Task { @MainActor in panel.urls.forEach { self?.open($0) } }
+        }
+    }
+
+    func open(_ fileURL: URL) {
+        guard fileURL.isFileURL else { return }
+        if let existing = tabs.first(where: { $0.url.standardizedFileURL == fileURL.standardizedFileURL }) {
+            selectedID = existing.id; return
+        }
+        do {
+            let data = try Data(contentsOf: fileURL, options: .mappedIfSafe)
+            let decoded = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .windowsCP1251) ?? String(decoding: data, as: UTF8.self)
+            let tab = MarkdownTab(url: fileURL, markdown: decoded)
+            tabs.append(tab); selectedID = tab.id
+            NSDocumentController.shared.noteNewRecentDocumentURL(fileURL)
+        } catch { NSSound.beep() }
+    }
+
+    func close(_ id: UUID) {
+        guard let index = tabs.firstIndex(where: { $0.id == id }) else { return }
+        tabs.remove(at: index)
+        if selectedID == id { selectedID = tabs.indices.contains(index) ? tabs[index].id : tabs.last?.id }
+    }
+    func closeSelected() { if let selectedID { close(selectedID) } }
+
+    func followLink(_ url: URL) {
+        if url.isFileURL, ["md", "markdown", "mdown"].contains(url.pathExtension.lowercased()) { open(url) }
+        else { NSWorkspace.shared.open(url) }
+    }
+
+    func showSearch() { isSearchPresented = true }
+    func hideSearch() { isSearchPresented = false; searchQuery = "" }
+    func findNext(backwards: Bool = false) { findRevision += backwards ? -1 : 1 }
+    func adjustTextSize(by step: Double) { textScale = min(1.45, max(0.75, textScale + step * 0.1)) }
+    func resetTextSize() { textScale = 1 }
+
+    func makeDefaultReader() {
+        let markdown = UTType(importedAs: "net.daringfireball.markdown", conformingTo: .plainText)
+        NSWorkspace.shared.setDefaultApplication(at: Bundle.main.bundleURL, toOpen: markdown) { [weak self] error in
+            Task { @MainActor in
+                self?.defaultReaderResult = error == nil
+                    ? "MDore теперь открывает Markdown по умолчанию"
+                    : "Выберите MDore через «Свойства файла»"
+            }
+        }
+    }
+}
