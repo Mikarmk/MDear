@@ -55,7 +55,9 @@ ln -s /Applications "$DMG_ROOT/Applications"
 cp "$ROOT_DIR/Resources/INSTALL.txt" "$DMG_ROOT/INSTALL.txt"
 cp "$ROOT_DIR/Resources/DMG/.DS_Store" "$DMG_ROOT/.DS_Store"
 
-swift "$ROOT_DIR/scripts/create_dmg_background.swift" "$DMG_ROOT/.background/background.png"
+swift "$ROOT_DIR/scripts/create_dmg_background.swift" \
+  "$DMG_ROOT/.background/background.png" \
+  "$ROOT_DIR/Resources/DMG/installer-texture.png"
 
 RW_DMG="$BUILD_DIR/MDore-rw.dmg"
 hdiutil create -quiet -volname "MDore Installer" -srcfolder "$DMG_ROOT" -ov -format UDRW "$RW_DMG"
@@ -76,7 +78,7 @@ tell application "Finder"
     set background picture of viewOptions to file ".background:background.png"
     set position of item "MDore.app" to {180, 225}
     set position of item "Applications" to {540, 225}
-    set position of item "INSTALL.txt" to {360, 365}
+    set position of item "INSTALL.txt" to {360, 315}
     update without registering applications
     delay 1
     close

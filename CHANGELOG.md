@@ -2,6 +2,12 @@
 
 All notable changes to MDore are documented here.
 
+## 2.0.3 — 2026-08-24
+
+- Reworked the DMG installer with a tactile charcoal background and a warm arrow made from Markdown symbols.
+- Improved contrast and hierarchy for the drag-to-Applications flow.
+- Gave `INSTALL.txt` a dedicated, clearly labeled trilingual area below the main installation action.
+
 ## 2.0.2 — 2026-08-24
 
 - Added a focused three-template shelf for blank documents, meeting notes, and project plans.
