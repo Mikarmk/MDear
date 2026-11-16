@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="320" viewBox="0 0 800 320" role="img" aria-labelledby="title desc">
+<title id="title">MDear star history — last 7 days</title>
+<desc id="desc">Daily cumulative totals of current GitHub stars, in UTC. 2026-11-10: 1; 2026-11-11: 1; 2026-11-12: 1; 2026-11-13: 1; 2026-11-14: 1; 2026-11-15: 1; 2026-11-16: 50. Today is partial.</desc>
+<rect width="800" height="320" fill="#ffffff"/>
+<g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif">
+<text x="28" y="34" fill="#24292f" font-size="17" font-weight="600">Star history</text>
+<text x="28" y="57" fill="#656d76" font-size="12">Last 7 days · Daily totals · UTC</text>
+<text x="764" y="35" text-anchor="end" fill="#24292f" font-size="22" font-weight="600">50 stars</text>
+<path d="M 52,254.00 H 764" stroke="#d8dee4" stroke-width="0.7"/>
+<text x="40" y="258.00" text-anchor="end" fill="#656d76" font-size="11">0</text>
+<path d="M 52,203.33 H 764" stroke="#d8dee4" stroke-width="0.7"/>
+<text x="40" y="207.33" text-anchor="end" fill="#656d76" font-size="11">20</text>
+<path d="M 52,152.67 H 764" stroke="#d8dee4" stroke-width="0.7"/>
+<text x="40" y="156.67" text-anchor="end" fill="#656d76" font-size="11">40</text>
+<path d="M 52,102.00 H 764" stroke="#d8dee4" stroke-width="0.7"/>
+<text x="40" y="106.00" text-anchor="end" fill="#656d76" font-size="11">60</text>
+<path d="M 52.00,251.47 C 91.56,251.47 131.11,251.47 170.67,251.47 C 210.22,251.47 249.78,251.47 289.33,251.47 C 328.89,251.47 368.44,251.47 408.00,251.47 C 447.56,251.47 487.11,251.47 526.67,251.47 C 566.22,251.47 605.78,251.47 645.33,251.47 C 684.89,251.47 724.44,168.71 764.00,127.33" fill="none" stroke="#507a82" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="52.00" cy="251.47" r="3" fill="#507a82"><title>2026-11-10: 1 stars</title></circle>
+<text x="52.00" y="279" text-anchor="middle" fill="#656d76" font-size="11">10 Nov</text>
+<circle cx="170.67" cy="251.47" r="3" fill="#507a82"><title>2026-11-11: 1 stars</title></circle>
+<text x="170.67" y="279" text-anchor="middle" fill="#656d76" font-size="11">11 Nov</text>
+<circle cx="289.33" cy="251.47" r="3" fill="#507a82"><title>2026-11-12: 1 stars</title></circle>
+<text x="289.33" y="279" text-anchor="middle" fill="#656d76" font-size="11">12 Nov</text>
+<circle cx="408.00" cy="251.47" r="3" fill="#507a82"><title>2026-11-13: 1 stars</title></circle>
+<text x="408.00" y="279" text-anchor="middle" fill="#656d76" font-size="11">13 Nov</text>
+<circle cx="526.67" cy="251.47" r="3" fill="#507a82"><title>2026-11-14: 1 stars</title></circle>
+<text x="526.67" y="279" text-anchor="middle" fill="#656d76" font-size="11">14 Nov</text>
+<circle cx="645.33" cy="251.47" r="3" fill="#507a82"><title>2026-11-15: 1 stars</title></circle>
+<text x="645.33" y="279" text-anchor="middle" fill="#656d76" font-size="11">15 Nov</text>
+<circle cx="764.00" cy="127.33" r="3" fill="#507a82"><title>2026-11-16: 50 stars</title></circle>
+<text x="764.00" y="279" text-anchor="middle" fill="#656d76" font-size="11">Today</text>
+<text x="28" y="307" fill="#656d76" font-size="10">GitHub · Updated 2026-11-16 · Today is partial</text>
+</g></svg>

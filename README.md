@@ -104,11 +104,13 @@ MDore stays deliberately focused: fast launch, excellent typography, local files
 
 <a href="https://www.star-history.com/?repos=Mikarmk%2FMDear&amp;type=date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Mikarmk/MDear&amp;type=Date&amp;theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Mikarmk/MDear&amp;type=Date" />
-    <img alt="Star history chart for MDear" src="https://api.star-history.com/svg?repos=Mikarmk/MDear&amp;type=Date" />
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/star-history-dark.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="docs/images/star-history-light.svg" />
+    <img alt="MDear star history over the last 7 days, daily totals in UTC" src="docs/images/star-history-light.svg" />
   </picture>
 </a>
+
+Daily totals for the last 7 days, updated hourly. Today is partial. Click the chart for the full history.
 
 ## License
 

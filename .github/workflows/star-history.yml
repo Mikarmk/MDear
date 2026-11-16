@@ -1,0 +1,44 @@
+name: Update star history
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/update_star_history.py
+      - .github/workflows/star-history.yml
+      - Tests/test_star_history.py
+
+concurrency:
+  group: star-history
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.repository == 'Mikarmk/MDear'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test chart data and rendering
+        run: python3 -m unittest discover -s Tests -p 'test_star_history.py'
+      - name: Generate charts from GitHub star timestamps
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --paginate -H 'Accept: application/vnd.github.star+json' \
+            "repos/${GITHUB_REPOSITORY}/stargazers?per_page=100" \
+            --jq '.[].starred_at' | python3 scripts/update_star_history.py
+      - name: Save updated charts
+        run: |
+          git add docs/images/star-history-light.svg docs/images/star-history-dark.svg
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'docs: update star history charts'
+          git push
