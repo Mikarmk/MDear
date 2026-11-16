@@ -100,6 +100,16 @@ Push a semantic version tag such as `v1.0.0`. GitHub Actions builds the universa
 
 MDore stays deliberately focused: fast launch, excellent typography, local files, and as little permanent interface as possible. It is a document-first Markdown workspace rather than an IDE or collaboration platform.
 
+## Star history
+
+<a href="https://www.star-history.com/?repos=Mikarmk%2FMDear&amp;type=date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Mikarmk/MDear&amp;type=Date&amp;theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Mikarmk/MDear&amp;type=Date" />
+    <img alt="Star history chart for MDear" src="https://api.star-history.com/svg?repos=Mikarmk/MDear&amp;type=Date" />
+  </picture>
+</a>
+
 ## License
 
 [MIT](LICENSE)
